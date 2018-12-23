@@ -1,0 +1,74 @@
+﻿
+@page "/"
+
+<div>
+    <div>
+        <label for="player">Enter a Player Name:</label>
+        <input type="text" name="player" placeholder="Player Name" bind="@Player" />
+        <button onclick="@AddPlayer">Enter Player</button>
+    </div>
+    <div>
+        <label for="deck">Enter a Deck Name:</label>
+        <input type="text" name="deck" placeholder="Deck Name" bind="@Deck" />
+        <button onclick="@AddDeck">Enter Deck</button>
+    </div>
+    <hr />
+    <button onclick="@GenerateResult">Generate Results</button>
+    @if (Result != null && Result.Count > 0)
+    {
+        <hr />
+        <ul>
+            @foreach (var line in Result)
+            {
+                <li>@line</li>
+            }
+        </ul>
+    }
+</div>
+
+@functions {
+    string Player { get; set; }
+    string Deck { get; set; }
+
+    List<string> Players { get; set; }
+    List<string> Decks { get; set; }
+    List<string> Result { get; set; }
+
+    protected override void OnInit()
+    {
+        base.OnInit();
+        Players = new List<string>();
+        Decks = new List<string>();
+        Result = new List<string>();
+    }
+
+    void AddPlayer()
+    {
+        if (!string.IsNullOrWhiteSpace(this.Player))
+        {
+            this.Players.Add(Player);
+            this.Player = string.Empty;
+        }
+    }
+
+    void AddDeck()
+    {
+        if (!string.IsNullOrWhiteSpace(this.Deck))
+        {
+            this.Decks.Add(Deck);
+            this.Deck = string.Empty;
+        }
+    }
+
+    void GenerateResult()
+    {
+        Result.Clear();
+        Random random = new Random();
+        var RandomPlayers = this.Players.OrderBy(item => random.Next());
+        var RandomDeck = this.Decks.OrderBy(item => random.Next());
+
+        RandomPlayers.Zip(RandomDeck, (player, deck) => $"{player} - {deck}").ToList().ForEach(item => Result.Add(item));
+
+        Result.Sort();
+    }
+}
