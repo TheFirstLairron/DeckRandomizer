@@ -2,73 +2,144 @@
 @page "/"
 
 <div>
-    <div>
-        <label for="player">Enter a Player Name:</label>
-        <input type="text" name="player" placeholder="Player Name" bind="@Player" />
-        <button onclick="@AddPlayer">Enter Player</button>
+    <div class="list_container">
+        <div class="player_list">
+            <div>
+                <label for="player">Enter a Player Name:</label>
+                <input type="text" name="player" placeholder="Player Name" bind="@Player" />
+                <button onclick="@AddPlayer">Enter Player</button>
+            </div>
+            <div>
+                @if (Players.Count > 0)
+                {
+
+                    <ol>
+                        @foreach (string player in Players)
+                        {
+                            <li>@player - <button onclick="@(() => this.RemoveItemFromList(this.Players, player))">Remove</button></li>
+                        }
+                    </ol>
+
+                }
+            </div>
+        </div>
+        <div class="deck_list">
+            <div>
+                <label for="deck">Enter a Deck Name:</label>
+                <input type="text" name="deck" placeholder="Deck Name" bind="@Deck" />
+                <button onclick="@AddDeck">Enter Deck</button>
+            </div>
+            <div>
+                @if (Decks.Count > 0)
+                {
+                    <ol>
+                        @foreach (string deck in Decks)
+                        {
+                            <li>@deck - <button onclick="@(() => this.RemoveItemFromList(this.Decks, deck))">Remove</button></li>
+                        }
+                    </ol>
+                }
+            </div>
+        </div>
     </div>
-    <div>
-        <label for="deck">Enter a Deck Name:</label>
-        <input type="text" name="deck" placeholder="Deck Name" bind="@Deck" />
-        <button onclick="@AddDeck">Enter Deck</button>
-    </div>
-    <hr />
-    <button onclick="@GenerateResult">Generate Results</button>
-    @if (Result != null && Result.Count > 0)
-    {
-        <hr />
-        <ul>
-            @foreach (var line in Result)
+    <div class="result_set">
+        @if (ErrorMessages == string.Empty)
+        {
+
+            <button class="generate_result_button" onclick="@GenerateResult">Generate Results</button>
+            @if (Result != null && Result.Count > 0)
             {
-                <li>@line</li>
+
+                <ul>
+                    @foreach (var line in Result)
+                    {
+                        <li>@line</li>
+                    }
+                </ul>
+
             }
-        </ul>
-    }
+
+        }
+        else
+        {
+            <div>@ErrorMessages</div>
+        }
+    </div>
 </div>
 
 @functions {
-    string Player { get; set; }
-    string Deck { get; set; }
+string Player { get; set; }
+string Deck { get; set; }
+string ErrorMessages { get; set; }
 
-    List<string> Players { get; set; }
-    List<string> Decks { get; set; }
-    List<string> Result { get; set; }
+List<string> Players { get; set; }
+List<string> Decks { get; set; }
+List<string> Result { get; set; }
 
-    protected override void OnInit()
+protected override void OnInit()
+{
+    base.OnInit();
+    Players = new List<string>();
+    Decks = new List<string>();
+    Result = new List<string>();
+    ErrorMessages = string.Empty;
+    CheckErrorConditions();
+}
+
+void AddPlayer()
+{
+    if (!string.IsNullOrWhiteSpace(this.Player))
     {
-        base.OnInit();
-        Players = new List<string>();
-        Decks = new List<string>();
-        Result = new List<string>();
+        this.Players.Add(Player);
+        this.Player = string.Empty;
     }
 
-    void AddPlayer()
+    CheckErrorConditions();
+}
+
+void AddDeck()
+{
+    if (!string.IsNullOrWhiteSpace(this.Deck))
     {
-        if (!string.IsNullOrWhiteSpace(this.Player))
-        {
-            this.Players.Add(Player);
-            this.Player = string.Empty;
-        }
+        this.Decks.Add(Deck);
+        this.Deck = string.Empty;
     }
 
-    void AddDeck()
-    {
-        if (!string.IsNullOrWhiteSpace(this.Deck))
-        {
-            this.Decks.Add(Deck);
-            this.Deck = string.Empty;
-        }
-    }
+    CheckErrorConditions();
+}
 
-    void GenerateResult()
+void RemoveItemFromList(List<string> list, string item)
+{
+    list.RemoveAll(u => u.Contains(item));
+    CheckErrorConditions();
+}
+
+void CheckErrorConditions()
+{
+    if (Players.Count != Decks.Count)
     {
         Result.Clear();
-        Random random = new Random();
-        var RandomPlayers = this.Players.OrderBy(item => random.Next());
-        var RandomDeck = this.Decks.OrderBy(item => random.Next());
-
-        RandomPlayers.Zip(RandomDeck, (player, deck) => $"{player} - {deck}").ToList().ForEach(item => Result.Add(item));
-
-        Result.Sort();
+        ErrorMessages = "Player and Deck count must be equivalent.";
     }
+    else if (Players.Count == 0 || Decks.Count == 0)
+    {
+        ErrorMessages = "Player and Deck lists must not be empty.";
+    }
+    else
+    {
+        ErrorMessages = string.Empty;
+    }
+}
+
+void GenerateResult()
+{
+    Result.Clear();
+    Random random = new Random();
+    var RandomPlayers = this.Players.OrderBy(item => random.Next());
+    var RandomDeck = this.Decks.OrderBy(item => random.Next());
+
+    RandomPlayers.Zip(RandomDeck, (player, deck) => $"{player} - {deck}").ToList().ForEach(item => Result.Add(item));
+
+    Result.Sort();
+}
 }
