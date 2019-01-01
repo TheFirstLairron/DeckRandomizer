@@ -1,0 +1,32 @@
+﻿.list_container {
+    display: flex;
+    flex-direction: column;
+}
+
+.player_list {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-content: center;
+    border: 1px solid black;
+    min-height: 100px;
+}
+
+.deck_list {
+    display: flex;
+    flex-direction: column;    
+    justify-content: space-around;
+    align-content: center;
+    border: 1px solid black;
+    min-height: 100px;
+}
+
+.result_set {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.generate_result_button {
+    min-height: 50px;
+}
